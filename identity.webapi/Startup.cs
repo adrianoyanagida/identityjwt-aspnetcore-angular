@@ -78,6 +78,7 @@ namespace identity.webapi
                 Configuration.GetConnectionString("DefaultConnection")
             ));
 
+            services.AddCors();
             services.AddAutoMapper();
         }
 
@@ -94,6 +95,7 @@ namespace identity.webapi
                 app.UseHsts();
             }
             
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseAuthentication();
             app.UseMvc();
         }
