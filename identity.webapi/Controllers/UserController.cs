@@ -86,7 +86,7 @@ namespace identity.webapi.Controllers
 
                     return Ok(new
                     {
-                        token = GenerateJWToken(appUser).Result,
+                        token = GenerateJWToken(appUser),
                         user = userToReturn
                     });
                 }
@@ -98,22 +98,22 @@ namespace identity.webapi.Controllers
                 return this.StatusCode(StatusCodes.Status500InternalServerError, $"Banco de dados falhou {ex.Message}");
             }
         }
-        private async Task<string> GenerateJWToken(User user)
+
+        private string GenerateJWToken(User user)
         {
-            var claims = new List<Claim> {
-                // Criando a primeira claim,a primeira questão de autorização (id)
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                // (UserName)
-                new Claim(ClaimTypes.Name, user.UserName)
-            };
+            var claims = JWTClaims(user);
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var tokenDescriptor = TokenDescriptor(claims);
 
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            var tokenHandler = new JwtSecurityTokenHandler();
 
+            var token = new JwtSecurityTokenHandler().CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
+        public SecurityTokenDescriptor TokenDescriptor(List<Claim> claims)
+        {
             var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_config.GetSection("AppSettings:Token").Value));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -125,11 +125,29 @@ namespace identity.webapi.Controllers
                 SigningCredentials = creds
             };
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+            return tokenDescriptor;
+        }
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+        public List<Claim> JWTClaims(User user)
+        {
+            var roles = GetRolesFromUser(user).Result;
 
-            return tokenHandler.WriteToken(token);
+            var claims = new List<Claim> {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName)
+            };
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            return claims;
+        }
+
+        public async Task<IList<string>> GetRolesFromUser(User user)
+        {
+            return await _userManager.GetRolesAsync(user);
         }
     }
 }
