@@ -32,7 +32,16 @@ export class HttpEndpointsService {
   }
 
   loggedIn() {
-    const token = localStorage.getItem('token');
-    return !this.jwtHelper.isTokenExpired(token);
+    const token = this.getTokenFromLocalStorage();
+    return !this.jwtHelper.isTokenExpired(token); // Retorna se não estiver expirado
+  }
+
+  isExpired() {
+    const token = this.getTokenFromLocalStorage();
+    return this.jwtHelper.isTokenExpired(token); // Retorna se estiver expirado
+  }
+
+  getTokenFromLocalStorage() {
+    return localStorage.getItem('token');
   }
 }

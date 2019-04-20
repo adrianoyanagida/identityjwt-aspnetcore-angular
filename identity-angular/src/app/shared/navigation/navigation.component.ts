@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpEndpointsService } from 'src/app/_services/HttpEndpoints.service';
 import { Router } from '@angular/router';
+import { LoginComponent } from 'src/app/login/login.component';
 
 @Component({
   selector: 'app-navigation',
@@ -10,7 +11,8 @@ import { Router } from '@angular/router';
 export class NavigationComponent implements OnInit {
 
   constructor(private endpoints: HttpEndpointsService,
-              private router: Router) { }
+              private router: Router,
+  ) { }
 
   ngOnInit() {
   }

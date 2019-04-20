@@ -8,15 +8,16 @@ import { HttpEndpointsService } from '../_services/HttpEndpoints.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
+
   model: any = {};
 
   constructor(
-    private router: Router,
+    public router: Router,
     private HttpEndpoints: HttpEndpointsService
     ) { }
 
   ngOnInit() {
-    if (localStorage.getItem('token') != null) {
+    if (localStorage.getItem('token') != null || !this.HttpEndpoints.isExpired()) {
       this.router.navigate(['/home']);
     }
   }
